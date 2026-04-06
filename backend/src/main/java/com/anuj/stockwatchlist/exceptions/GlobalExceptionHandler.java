@@ -103,4 +103,56 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<StockErrorResponse>> handlerException(UnauthorizedException exc) {
+        logger.error("UnauthorizedException occured: {}", exc);
+
+        StockErrorResponse err = new StockErrorResponse();
+
+        err.setStatus(HttpStatus.FORBIDDEN.value());
+        err.setMessage(exc.getMessage());
+        err.setTimeStamp(System.currentTimeMillis());
+
+        return new ResponseEntity<>(new ApiResponse<>(false, err.getMessage(), err), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<StockErrorResponse>> handlerException(UserAlreadyExistsException exc) {
+        logger.error("UserAlreadyExistsException occured: {}", exc);
+
+        StockErrorResponse err = new StockErrorResponse();
+
+        err.setStatus(HttpStatus.CONFLICT.value());
+        err.setMessage(exc.getMessage());
+        err.setTimeStamp(System.currentTimeMillis());
+
+        return new ResponseEntity<>(new ApiResponse<>(false, err.getMessage(), err), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<StockErrorResponse>> handlerException(EmailAlreadyExistsException exc) {
+        logger.error("EmailAlreadyExistsException occured: {}", exc);
+
+        StockErrorResponse err = new StockErrorResponse();
+
+        err.setStatus(HttpStatus.CONFLICT.value());
+        err.setMessage(exc.getMessage());
+        err.setTimeStamp(System.currentTimeMillis());
+
+        return new ResponseEntity<>(new ApiResponse<>(false, err.getMessage(), err), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<StockErrorResponse>> handlerException(InvalidCredentialsException exc) {
+        logger.error("InvalidCredentialsException occured: {}", exc);
+
+        StockErrorResponse err = new StockErrorResponse();
+
+        err.setStatus(HttpStatus.UNAUTHORIZED.value());
+        err.setMessage(exc.getMessage());
+        err.setTimeStamp(System.currentTimeMillis());
+
+        return new ResponseEntity<>(new ApiResponse<>(false, err.getMessage(), err), HttpStatus.UNAUTHORIZED);
+    }
+
 }

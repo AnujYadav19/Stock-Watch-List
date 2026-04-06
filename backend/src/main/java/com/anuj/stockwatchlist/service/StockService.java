@@ -8,21 +8,20 @@ import com.anuj.stockwatchlist.dto.StockResponseDTO;
 import com.anuj.stockwatchlist.models.Stock;
 
 public interface StockService {
-    List<Stock> getAllStock();
 
-    StockResponseDTO saveStock(StockRequestDTO s);
+    StockResponseDTO saveStock(StockRequestDTO s, int user_id);
 
-    StockResponseDTO deleteStockById(int id);
+    StockResponseDTO deleteStockById(int id, int user_id);
 
-    StockResponseDTO findByIdDTO(int id);
+    StockResponseDTO findByIdDTO(int id, int user_id);
 
-    Stock findById(int id);
+    Stock findById(int id, int user_id);
 
-    StockResponseDTO updateStockById(int id, StockRequestDTO s);
+    StockResponseDTO updateStockById(int id, StockRequestDTO s, int user_id);
 
     PaginatedResponse<StockResponseDTO> getStocks(String symbol, int page, int size, String[] sortBy,
-            String direction[]);
+            String direction[], int user_id);
 
-    StockResponseDTO findBySymbol(String symbol);
+    List<StockResponseDTO> findBySymbol(String symbol, int user_id);
 
 }
