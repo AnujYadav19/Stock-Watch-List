@@ -4,16 +4,22 @@ import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.anuj.stockwatchlist.repository.UserRepository;
+import com.anuj.stockwatchlist.dto.LoginRequestDTO;
+import com.anuj.stockwatchlist.dto.LoginResponseDTO;
 import com.anuj.stockwatchlist.dto.UserRequestDTO;
 import com.anuj.stockwatchlist.dto.UserResponseDTO;
 import com.anuj.stockwatchlist.exceptions.UserAlreadyExistsException;
 import com.anuj.stockwatchlist.exceptions.EmailAlreadyExistsException;
 import com.anuj.stockwatchlist.exceptions.InvalidCredentialsException;
 import com.anuj.stockwatchlist.models.User;
+import com.anuj.stockwatchlist.models.UserPrincipal;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -27,6 +33,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
 
+    @Autowired
+    JwtService jwtService;
+
+    @Autowired
+    AuthenticationManager authManager;
+
     @Override
     public User findUserById(int id) {
         Optional<User> user = userRepository.findById(id);
@@ -37,7 +49,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO register(UserRequestDTO user) {
+    public LoginResponseDTO register(UserRequestDTO user) {
 
         String username = user.getUsername();
         String email = user.getEmail();
@@ -50,36 +62,32 @@ public class UserServiceImpl implements UserService {
         User theUser = mapper.map(user, User.class);
         theUser.setRole("ROLE_USER");
         theUser.setPassword(passwordEncoder.encode(theUser.getPassword()));
-        userRepository.save(theUser);
-        return mapper.map(theUser, UserResponseDTO.class);
+        User savedUser = userRepository.save(theUser);
+        String token = jwtService.generateToken(savedUser.getId());
+
+        return new LoginResponseDTO(token, "Bearer", jwtService.getExpirationTime());
     }
 
     @Override
-    public UserResponseDTO login(UserRequestDTO user) {
-        String username = user.getUsername();
-
-        Optional<User> dbUser = userRepository.findByUsername(username);
-
-        if (dbUser.isEmpty()) {
-            throw new InvalidCredentialsException("Invalid username or password");
+    public LoginResponseDTO login(LoginRequestDTO user) {
+        Authentication authentication = authManager
+                .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        if (!authentication.isAuthenticated()) {
+            throw new InvalidCredentialsException("Incorrect Username or Password");
         }
-        if (!passwordEncoder.matches(user.getPassword(), dbUser.get().getPassword())) {
-            throw new InvalidCredentialsException("Invalid username or password");
-        }
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
 
-        return mapper.map(dbUser, UserResponseDTO.class);
+        String token = jwtService.generateToken(principal.getId());
+        return new LoginResponseDTO(token, "Bearer", jwtService.getExpirationTime());
+
     }
 
     @Override
     public UserResponseDTO deleteUser(int id) {
-        // 1. Find the user first (or throw exception)
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
-        // 2. Map to DTO before deleting so we can return the data
         UserResponseDTO response = mapper.map(user, UserResponseDTO.class);
-
-        // 3. Delete from DB (Cascade will handle the stocks automatically)
         userRepository.delete(user);
 
         return response;

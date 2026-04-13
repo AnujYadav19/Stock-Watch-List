@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Login from "./Login";
 import Register from "./Register";
 
@@ -38,7 +38,7 @@ const FEATURES = [
     num: "03",
     icon: "🔒",
     title: "Secure & Private",
-    desc: "Your portfolio is yours alone. Encrypted storage, session-based auth, zero data sharing.",
+    desc: "Your portfolio is yours alone. Token-based auth, private user accounts, zero data sharing.",
   },
 ];
 
@@ -49,8 +49,25 @@ const TERMINAL_STOCKS = [
   { symbol: "MSFT", name: "Microsoft", price: "$415.20", change: "+0.56%", up: true },
 ];
 
-export default function Home({ setUserId }) {
+export default function Home({ setAuthToken }) {
   const [authMode, setAuthMode] = useState("none");
+  const authCardRef = useRef(null);
+
+  useEffect(() => {
+    if (authMode === "none") return;
+    if (!window.matchMedia("(max-width: 1120px)").matches) return;
+
+    requestAnimationFrame(() => {
+      authCardRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }, [authMode]);
+
+  function openAuth(mode) {
+    setAuthMode(mode);
+  }
 
   return (
     <div className="home-wrapper">
@@ -80,10 +97,10 @@ export default function Home({ setUserId }) {
               STOCKPULSE
             </div>
             <div className="nav-actions">
-              <button className="btn-ghost" onClick={() => setAuthMode("login")}>
+              <button className="btn-ghost" onClick={() => openAuth("login")}>
                 LOGIN
               </button>
-              <button className="btn-primary-hero" onClick={() => setAuthMode("register")}>
+              <button className="btn-primary-hero" onClick={() => openAuth("register")}>
                 GET STARTED →
               </button>
             </div>
@@ -109,7 +126,7 @@ export default function Home({ setUserId }) {
                 that actually tells you what's happening to your money.
               </p>
               <div className="hero-cta-group">
-                <button className="btn-cta" onClick={() => setAuthMode("register")}>
+                <button className="btn-cta" onClick={() => openAuth("register")}>
                   START TRACKING →
                 </button>
                 <button
@@ -154,7 +171,7 @@ export default function Home({ setUserId }) {
                 </div>
               </div>
             ) : (
-              <div className="auth-card">
+              <div className="auth-card" ref={authCardRef}>
                 <div className="auth-header">
                   <div>
                     <div className="auth-title">
@@ -172,16 +189,16 @@ export default function Home({ setUserId }) {
                 </div>
 
                 {authMode === "login" ? (
-                  <Login setUserId={setUserId} />
+                  <Login setAuthToken={setAuthToken} />
                 ) : (
-                  <Register setUserId={setUserId} />
+                  <Register setAuthToken={setAuthToken} />
                 )}
 
                 <div className="auth-switch">
                   {authMode === "login" ? "New here?" : "Already a member?"}
                   <button
                     className="auth-switch-btn"
-                    onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}
+                    onClick={() => openAuth(authMode === "login" ? "register" : "login")}
                   >
                     {authMode === "login" ? "Create account →" : "Sign in →"}
                   </button>

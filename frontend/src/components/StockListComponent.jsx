@@ -6,8 +6,8 @@ export default function StockListComponent({
   setStocks,
   prices,
   setPrices,
-  userId,
-  setUserId,
+  authToken,
+  setAuthToken,
 }) {
   const [inputData, setInputData] = useState({ symbol: "", buyPrice: "", quantity: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +58,10 @@ export default function StockListComponent({
 
     const response = await fetch("http://localhost:8080/api/stocks", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-User-Id": userId },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify({
         symbol: cleanInputVal,
         buyPrice: Number(inputData.buyPrice),
@@ -84,14 +87,14 @@ export default function StockListComponent({
   async function deleteStock(id) {
     await fetch(`http://localhost:8080/api/stocks/${id}`, {
       method: "DELETE",
-      headers: { "X-User-Id": userId },
+      headers: { Authorization: `Bearer ${authToken}` },
     });
     setStocks((stocks) => stocks.filter((s) => s.id !== id));
   }
 
   function logout() {
-    localStorage.removeItem("userId");
-    setUserId("");
+    localStorage.removeItem("token");
+    setAuthToken("");
     setStocks([]);
     setPrices({});
   }
@@ -99,15 +102,19 @@ export default function StockListComponent({
   useEffect(() => {
     async function getInitialData() {
       const response = await fetch("http://localhost:8080/api/stocks?sortBy=id&direction=desc", {
-        headers: { "X-User-Id": userId },
+        headers: { Authorization: `Bearer ${authToken}` },
       });
+      if (!response.ok) {
+        console.error("Initial stock fetch failed", response.status);
+        return;
+      }
       const jsonResponse = await response.json();
       const stockList = jsonResponse.data.content;
       setStocks(stockList);
       await fetchPrices(stockList);
     }
     getInitialData();
-  }, [userId]);
+  }, [authToken]);
 
   // Derived stats
   const totalPortfolioValue = stocks.reduce((acc, s) => {

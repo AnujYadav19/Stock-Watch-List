@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function Register({ setUserId }) {
+export default function Register({ setAuthToken }) {
   const [formData, setFormData] = useState({ username: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -25,8 +25,8 @@ export default function Register({ setUserId }) {
       const jsonResponse = await response.json();
 
       if (jsonResponse.success) {
-        setUserId(jsonResponse.data.id);
-        localStorage.setItem("userId", jsonResponse.data.id);
+        setAuthToken(jsonResponse.data.accessToken);
+        localStorage.setItem("token", jsonResponse.data.accessToken);
       } else {
         setError(jsonResponse.message || "Registration failed. Try again.");
       }

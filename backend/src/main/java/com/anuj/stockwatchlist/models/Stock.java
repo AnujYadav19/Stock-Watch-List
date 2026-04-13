@@ -2,7 +2,6 @@ package com.anuj.stockwatchlist.models;
 
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

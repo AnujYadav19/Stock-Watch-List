@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-export default function Login({ setUserId }) {
-  const [formData, setFormData] = useState({ username: "", email: "", password: "" });
+export default function Login({ setAuthToken }) {
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,8 +25,8 @@ export default function Login({ setUserId }) {
       const jsonResponse = await response.json();
 
       if (jsonResponse.success) {
-        setUserId(jsonResponse.data.id);
-        localStorage.setItem("userId", jsonResponse.data.id);
+        setAuthToken(jsonResponse.data.accessToken);
+        localStorage.setItem("token", jsonResponse.data.accessToken);
       } else {
         setError(jsonResponse.message || "Invalid credentials.");
       }
@@ -53,22 +53,6 @@ export default function Login({ setUserId }) {
           id="login-username"
           placeholder="your_username"
           value={formData.username}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div className="form-group">
-        <label className="form-label" htmlFor="login-email">
-          Email
-        </label>
-        <input
-          className="form-input"
-          type="email"
-          name="email"
-          id="login-email"
-          placeholder="name@example.com"
-          value={formData.email}
           onChange={handleChange}
           required
         />

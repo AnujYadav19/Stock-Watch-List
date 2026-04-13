@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +52,8 @@ public class StockController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "symbol") String sortBy[],
             @RequestParam(defaultValue = "asc") String direction[],
-            @RequestHeader(value = "X-User-Id") int userId) {
+            Authentication authentication) {
+        int userId = Integer.parseInt(authentication.getName());
         logger.info("GET /stocks request received with symbol : {}", symbol);
         PaginatedResponse<StockResponseDTO> response = service.getStocks(symbol, page, size, sortBy, direction, userId);
         logger.info("GET /stocks completed with {} stocks retrieved", response.getTotalElements());
@@ -61,7 +63,8 @@ public class StockController {
 
     @GetMapping("/stocks/search")
     public ApiResponse<List<StockResponseDTO>> getStockBySymbol(@RequestParam String symbol,
-            @RequestHeader(value = "X-User-Id") int userId) {
+            Authentication authentication) {
+        int userId = Integer.parseInt(authentication.getName());
         logger.info("GET /stocks/search request received with symbol: {}", symbol);
         List<StockResponseDTO> response = service.findBySymbol(symbol, userId);
         logger.info("GET /stocks/search completed successfully for {} stocks", response.size());
@@ -71,7 +74,9 @@ public class StockController {
 
     @GetMapping("/stocks/{id}")
     public ApiResponse<StockResponseDTO> getStock(@PathVariable int id,
-            @RequestHeader(value = "X-User-Id") int userId) {
+            Authentication authentication) {
+        int userId = Integer.parseInt(authentication.getName());
+
         logger.info("GET /stocks/{id} request received with id: {}", id);
         StockResponseDTO response = service.findByIdDTO(id, userId);
         logger.info("GET /stocks/{id} completed successfully with id:{}", response.getId());
@@ -83,7 +88,8 @@ public class StockController {
 
     @PostMapping("/stocks")
     public ApiResponse<StockResponseDTO> addStock(@Valid @RequestBody StockRequestDTO s,
-            @RequestHeader(value = "X-User-Id") int userId) {
+            Authentication authentication) {
+        int userId = Integer.parseInt(authentication.getName());
         logger.info("POST /stocks request received with symbol: {}", s.getSymbol());
         StockResponseDTO response = service.saveStock(s, userId);
         logger.info("POST /stocks completed successfully with id : {}", response.getId());
@@ -92,7 +98,9 @@ public class StockController {
 
     @PutMapping("/stocks/{id}")
     public ApiResponse<StockResponseDTO> updateStock(@Valid @RequestBody StockRequestDTO s, @PathVariable int id,
-            @RequestHeader(value = "X-User-Id") int userId) {
+            Authentication authentication) {
+        int userId = Integer.parseInt(authentication.getName());
+
         logger.info("PUT /stocks/{id} request received with id: {}, symbol: {}", id, s.getSymbol());
         StockResponseDTO response = service.updateStockById(id, s, userId);
         logger.info("PUT /stocks/{id} completed successfully with id : {}", response.getId());
@@ -102,7 +110,9 @@ public class StockController {
 
     @DeleteMapping("/stocks/{id}")
     public ApiResponse<StockResponseDTO> deleteStock(@PathVariable int id,
-            @RequestHeader(value = "X-User-Id") int userId) {
+            Authentication authentication) {
+        int userId = Integer.parseInt(authentication.getName());
+
         logger.info("DELETE /stocks/{id} request received with id: {}", id);
         StockResponseDTO response = service.deleteStockById(id, userId);
         logger.info("DELETE /stocks/{id} completed successfully with id : {}", id);

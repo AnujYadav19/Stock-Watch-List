@@ -9,21 +9,20 @@ function App() {
   const [stocks, setStocks] = useState([]);
   const [prices, setPrices] = useState({}); //an object where the key is the symbol and the value is its price
 
-  const [userId, setUserId] = useState(localStorage.getItem("userId") || "");
+  const [authToken, setAuthToken] = useState(localStorage.getItem("token") || "");
 
   return (
     <div>
-      {userId == "" ? (
-        <Home userId={userId} setUserId={setUserId} />
+      {authToken == "" ? (
+        <Home authToken={authToken} setAuthToken={setAuthToken} />
       ) : (
-        // <Login userId={userId} setUserId={setUserId} />
         <StockListComponent
           stocks={stocks}
           setStocks={setStocks}
           prices={prices}
           setPrices={setPrices}
-          userId={userId}
-          setUserId={setUserId}
+          authToken={authToken}
+          setAuthToken={setAuthToken}
         />
       )}
     </div>
